@@ -10,11 +10,12 @@ var browserify   = require('browserify');
 var gulp         = require('gulp');
 var source       = require('vinyl-source-stream');
 
-gulp.task('browserify-ext', function() {
-    return browserify('./src/app-ext.js')
+gulp.task('browserify-http-recorder', function() {
+    return browserify('./src/http-recorder.js')
         .bundle()
         //Pass desired output filename to vinyl-source-stream
-        .pipe(source('ui-recorder-ext.js'))
+        .pipe(source('http-recorder.js'))
         // Start piping stream to tasks!
-        .pipe(gulp.dest('.'));
+        .pipe(gulp.dest('.'))
+        .pipe(gulp.dest('./test/'));
 });

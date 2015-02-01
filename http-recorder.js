@@ -1,3 +1,4 @@
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // modified from https://github.com/slorber/ajax-interceptor
 // override XMLHttpRequest.prototype.send can capture method and url
 'use strict';
@@ -99,3 +100,77 @@ exports.unwire = function () {
     XMLHttpRequest.prototype.send = RealXHRSend;
     wired = false;
 };
+},{}],2:[function(require,module,exports){
+/*jslint nomen: true*/
+/*global $,define,require,module */
+
+var ajaxInterceptor = require('./ajax-interceptor'),
+    xhrStore = require('./xhr-store'),
+    isRecording = false;
+
+ajaxInterceptor.addResponseCallback(function(xhr) {
+    if (isRecording) {
+        xhrStore.save(xhr);
+    }
+});
+
+exports.record = function () {
+    isRecording = true;
+    ajaxInterceptor.wire();
+};
+
+exports.stop = function () {
+    isRecording = false;
+    ajaxInterceptor.unwire();
+};
+
+exports.clear = function () {
+    xhrStore.clear();
+};
+
+exports.getRecordedXhrs = function () {
+    return xhrStore.getAll();
+};
+
+window.httpRecorder = exports;
+
+// copy(httpRecorder.getRecordedXhrs())
+},{"./ajax-interceptor":1,"./xhr-store":3}],3:[function(require,module,exports){
+/*jslint nomen: true*/
+/*global $,define,require,module */
+
+var store = {};
+
+function cleanUrl(url) {
+    // todo: strip out unnecessary parameters such as timestamp
+    return url;
+}
+
+function isResponseTextValid(xhr) {
+    var responseType = xhr.responseType;
+    return responseType === '' || responseType === 'text';
+}
+
+function getXhrData(xhr) {
+    return {
+        requestURL: cleanUrl(xhr.requestURL),
+        requestText: xhr.requestText,
+        status: xhr.status,
+        statusText: xhr.statusText,
+        responseText: isResponseTextValid(xhr) ? xhr.responseText : '',
+        response: xhr.response
+    };
+}
+
+function getXhrKey(xhr) {
+    return cleanUrl(xhr.requestURL) + xhr.requestText;
+}
+
+exports.save = function (xhr) {
+    store[getXhrKey(xhr)] = getXhrData(xhr);
+};
+
+exports.getAll = function () {
+    return store;
+};
+},{}]},{},[2])
