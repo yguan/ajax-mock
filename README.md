@@ -27,18 +27,9 @@ Here are the steps:
 
 * Install `gulp` globally if you haven't done so.
 * Run `npm install`.
-* Run `gulp` to build the `ui-recorder.js`.
-* Run `gulp http` to start a http server at port `9000`.
-  * Point your browser to `localhost:9000/index.html`.
-  * Open browser's console.
-  * Click some elements on the page and you should see the output from the recorder, and you can debug `ui-recorder.js`.
+* Run `gulp` to build the `http-recorder.js and ajax-mock.js`.
 
 ## Usage
-
-For now, you have to manually copy and paste to get the recorder running, and here are the steps:
-
-Here are the steps:
-
 
 ## License
 
