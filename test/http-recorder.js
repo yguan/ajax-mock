@@ -135,42 +135,57 @@ exports.getRecordedXhrs = function () {
 window.httpRecorder = exports;
 
 // copy(httpRecorder.getRecordedXhrs())
-},{"./ajax-interceptor":1,"./xhr-store":3}],3:[function(require,module,exports){
+},{"./ajax-interceptor":1,"./xhr-store":5}],3:[function(require,module,exports){
 /*jslint nomen: true*/
 /*global $,define,require,module */
 
-var store = {};
+exports.clean = function (url) {
+    return url; // todo: strip out unnecessary parameters such as timestamp
+};
 
-function cleanUrl(url) {
-    // todo: strip out unnecessary parameters such as timestamp
-    return url;
-}
+},{}],4:[function(require,module,exports){
+/*jslint nomen: true*/
+/*global $,define,require,module */
+
+var urlSanitizer = require('./url-sanitizer');
+
+exports.getKey = function (xhr) {
+    return urlSanitizer.clean(xhr.requestURL) + xhr.requestText;
+};
+},{"./url-sanitizer":3}],5:[function(require,module,exports){
+/*jslint nomen: true*/
+/*global $,define,require,module */
+
+var xhrKeyGenerator = require('./xhr-key-generator');
+var store = {};
 
 function isResponseTextValid(xhr) {
     var responseType = xhr.responseType;
     return responseType === '' || responseType === 'text';
 }
 
-function getXhrData(xhr) {
+function getResponseHeader(xhr) {
     return {
-        requestURL: cleanUrl(xhr.requestURL),
-        requestText: xhr.requestText,
-        status: xhr.status,
-        statusText: xhr.statusText,
-        responseText: isResponseTextValid(xhr) ? xhr.responseText : '',
-        response: xhr.response
+        'Content-Type': xhr.getResponseHeader('Content-Type')
     };
 }
 
-function getXhrKey(xhr) {
-    return cleanUrl(xhr.requestURL) + xhr.requestText;
+function getXhrData(xhr) {
+    return {
+        requestURL: xhr.requestURL,
+        requestText: xhr.requestText,
+        status: xhr.status,
+        responseHeader: getResponseHeader(xhr),
+        responseText: isResponseTextValid(xhr) ? xhr.responseText : '',
+        response: xhr.response // this may not require
+    };
 }
 
 exports.save = function (xhr) {
-    store[getXhrKey(xhr)] = getXhrData(xhr);
+    store[xhrKeyGenerator.getKey(xhr)] = getXhrData(xhr);
 };
 
 exports.getAll = function () {
     return store;
 };
-},{}]},{},[2])
+},{"./xhr-key-generator":4}]},{},[2])

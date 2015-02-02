@@ -1,44 +1,3 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-/*jslint nomen: true*/
-/*global $,define,require,module */
-
-var xhrKeyGenerator = require('./xhr-key-generator');
-var mockHttpServer = require('./mock').create();
-var RealXHROpen = XMLHttpRequest.prototype.open;
-var xhrMockData;
-
-mockHttpServer.handle = function (xhr) {
-    var mockData = xhrMockData[xhrKeyGenerator.getKey(xhr)];
-    var responseHeader = mockData.responseHeader;
-    Object.keys(responseHeader).forEach(function(key) {
-        xhr.setResponseHeader(key, responseHeader[key]);
-    });
-    xhr.receive(mockData.status, mockData.responseText);
-};
-
-function interceptedXhrOpen() {
-    this.method = arguments[0];
-    this.requestURL = arguments[1];
-
-    RealXHROpen.apply(this, arguments);
-}
-
-exports.loadMockData = function (data) {
-    xhrMockData = data;
-};
-
-exports.start = function () {
-    XMLHttpRequest.prototype.open = interceptedXhrOpen;
-    mockHttpServer.start();
-};
-
-exports.stop = function () {
-    mockHttpServer.stop();
-    XMLHttpRequest.prototype.open = RealXHROpen;
-};
-
-window.ajaxMock = exports;
-},{"./mock":2,"./xhr-key-generator":4}],2:[function(require,module,exports){
 /*
  * Mock XMLHttpRequest (see http://www.w3.org/TR/XMLHttpRequest)
  *
@@ -511,21 +470,3 @@ MockHttpServer.prototype = {
 exports.create = function () {
     return new MockHttpServer();
 };
-},{}],3:[function(require,module,exports){
-/*jslint nomen: true*/
-/*global $,define,require,module */
-
-exports.clean = function (url) {
-    return url; // todo: strip out unnecessary parameters such as timestamp
-};
-
-},{}],4:[function(require,module,exports){
-/*jslint nomen: true*/
-/*global $,define,require,module */
-
-var urlSanitizer = require('./url-sanitizer');
-
-exports.getKey = function (xhr) {
-    return urlSanitizer.clean(xhr.requestURL) + xhr.requestText;
-};
-},{"./url-sanitizer":3}]},{},[1])

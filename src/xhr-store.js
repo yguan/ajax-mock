@@ -1,35 +1,33 @@
 /*jslint nomen: true*/
 /*global $,define,require,module */
 
+var xhrKeyGenerator = require('./xhr-key-generator');
 var store = {};
-
-function cleanUrl(url) {
-    // todo: strip out unnecessary parameters such as timestamp
-    return url;
-}
 
 function isResponseTextValid(xhr) {
     var responseType = xhr.responseType;
     return responseType === '' || responseType === 'text';
 }
 
+function getResponseHeader(xhr) {
+    return {
+        'Content-Type': xhr.getResponseHeader('Content-Type')
+    };
+}
+
 function getXhrData(xhr) {
     return {
-        requestURL: cleanUrl(xhr.requestURL),
+        requestURL: xhr.requestURL,
         requestText: xhr.requestText,
         status: xhr.status,
-        statusText: xhr.statusText,
+        responseHeader: getResponseHeader(xhr),
         responseText: isResponseTextValid(xhr) ? xhr.responseText : '',
         response: xhr.response // this may not require
     };
 }
 
-function getXhrKey(xhr) {
-    return cleanUrl(xhr.requestURL) + xhr.requestText;
-}
-
 exports.save = function (xhr) {
-    store[getXhrKey(xhr)] = getXhrData(xhr);
+    store[xhrKeyGenerator.getKey(xhr)] = getXhrData(xhr);
 };
 
 exports.getAll = function () {
