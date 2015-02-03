@@ -4,5 +4,5 @@
 var urlSanitizer = require('./url-sanitizer');
 
 exports.getKey = function (xhr) {
-    return urlSanitizer.clean(xhr.requestURL) + xhr.requestText;
+    return urlSanitizer.clean(xhr.requestURL || xhr.url) + xhr.requestText;
 };

@@ -140,7 +140,7 @@ window.httpRecorder = exports;
 /*global $,define,require,module */
 
 exports.clean = function (url) {
-    return url; // todo: strip out unnecessary parameters such as timestamp
+    return url.replace(/_dc=\d+/g, ''); // remove string such as "_dc=2837" from url
 };
 
 },{}],4:[function(require,module,exports){
@@ -150,7 +150,7 @@ exports.clean = function (url) {
 var urlSanitizer = require('./url-sanitizer');
 
 exports.getKey = function (xhr) {
-    return urlSanitizer.clean(xhr.requestURL) + xhr.requestText;
+    return urlSanitizer.clean(xhr.requestURL || xhr.url) + xhr.requestText;
 };
 },{"./url-sanitizer":3}],5:[function(require,module,exports){
 /*jslint nomen: true*/

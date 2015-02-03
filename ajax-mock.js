@@ -4,7 +4,6 @@
 
 var xhrKeyGenerator = require('./xhr-key-generator');
 var mockHttpServer = require('./mock').create();
-var RealXHROpen = XMLHttpRequest.prototype.open;
 var xhrMockData;
 
 mockHttpServer.handle = function (xhr) {
@@ -16,25 +15,16 @@ mockHttpServer.handle = function (xhr) {
     xhr.receive(mockData.status, mockData.responseText);
 };
 
-function interceptedXhrOpen() {
-    this.method = arguments[0];
-    this.requestURL = arguments[1];
-
-    RealXHROpen.apply(this, arguments);
-}
-
 exports.loadMockData = function (data) {
     xhrMockData = data;
 };
 
 exports.start = function () {
-    XMLHttpRequest.prototype.open = interceptedXhrOpen;
     mockHttpServer.start();
 };
 
 exports.stop = function () {
     mockHttpServer.stop();
-    XMLHttpRequest.prototype.open = RealXHROpen;
 };
 
 window.ajaxMock = exports;
@@ -516,7 +506,7 @@ exports.create = function () {
 /*global $,define,require,module */
 
 exports.clean = function (url) {
-    return url; // todo: strip out unnecessary parameters such as timestamp
+    return url.replace(/_dc=\d+/g, ''); // remove string such as "_dc=2837" from url
 };
 
 },{}],4:[function(require,module,exports){
@@ -526,6 +516,6 @@ exports.clean = function (url) {
 var urlSanitizer = require('./url-sanitizer');
 
 exports.getKey = function (xhr) {
-    return urlSanitizer.clean(xhr.requestURL) + xhr.requestText;
+    return urlSanitizer.clean(xhr.requestURL || xhr.url) + xhr.requestText;
 };
 },{"./url-sanitizer":3}]},{},[1])
