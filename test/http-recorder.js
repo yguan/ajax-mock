@@ -188,4 +188,8 @@ exports.save = function (xhr) {
 exports.getAll = function () {
     return store;
 };
+
+exports.clear = function () {
+    store = {};
+};
 },{"./xhr-key-generator":4}]},{},[2])
